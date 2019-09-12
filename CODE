@@ -1,0 +1,77 @@
+#include "FS.h"
+#include <SD.h>
+#include <SPI.h>
+#include <FastLED.h>
+
+
+#define NUM_LEDS 144
+#define DATA_PIN 34
+#define BAUD_RATE 1000000  //if using Glediator via serial
+#define MISO_PIN 19
+#define MOSI_PIN 24
+#define SCK_PIN 18
+#define CS_PIN 5
+
+File fxdata;
+CRGB leds[NUM_LEDS];
+//AltSoftSerial bluetooth;
+
+void setup()
+{
+  //begin serial
+  Serial.begin(9600);
+  Serial.println("SD Test");
+  //bluetooth.begin(9600);
+  
+  //add leds
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.show();
+
+  //set hardware SPI pins
+ pinMode(CS_PIN, OUTPUT); // CS/SS pin as output for SD library to work.
+ digitalWrite(CS_PIN, HIGH); // workaround for sdcard failed error...
+
+  //try to begin SPI coms
+  if (!SD.begin())
+  {
+    Serial.println("sdcard initialization failed!");
+    return;
+  }
+  Serial.println("sdcard initialization done.");
+  
+  // test file open
+  fxdata = SD.open("X.dat");  // read only
+  if (fxdata)
+  {
+    Serial.println("file open ok");      
+    fxdata.close();
+  }
+}
+
+int serialGlediator ()
+{
+  while (!Serial.available()) {}
+  return Serial.read();
+}
+
+void loop()
+{
+  //open file
+  fxdata = SD.open("X.dat");  // read only
+  if (fxdata)
+  {
+    Serial.println("file open ok");      
+  }
+
+  //read and show
+  while (fxdata.available()) 
+  {
+    fxdata.readBytes((char*)leds, NUM_LEDS*3);
+    FastLED.show();
+   // FastLED.delay(50); // set the speed of the animation. 20 is appx ~ 500k bauds
+  }
+  
+  // close the file in order to prevent hanging IO or similar throughout time
+  fxdata.close();
+}
