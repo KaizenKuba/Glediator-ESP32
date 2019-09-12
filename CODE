@@ -1,15 +1,14 @@
-#include "FS.h"
 #include <SD.h>
 #include <SPI.h>
 #include <FastLED.h>
 
 
 #define NUM_LEDS 144
-#define DATA_PIN 34
+#define DATA_PIN 12
 #define BAUD_RATE 1000000  //if using Glediator via serial
-#define MISO_PIN 19
-#define MOSI_PIN 24
-#define SCK_PIN 18
+//#define MISO_PIN 19
+//#define MOSI_PIN 24
+//#define SCK_PIN 18
 #define CS_PIN 5
 
 File fxdata;
@@ -33,7 +32,7 @@ void setup()
  digitalWrite(CS_PIN, HIGH); // workaround for sdcard failed error...
 
   //try to begin SPI coms
-  if (!SD.begin())
+  if (!SD.begin(5))
   {
     Serial.println("sdcard initialization failed!");
     return;
